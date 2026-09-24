@@ -19,14 +19,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Unzip project
+        run: |
+          unzip -o "NovaAI-Android-updated.zip" -d extracted
 
-      - name: Build APK
-        run: ./gradlew assembleDebug
+      - name: Find project folder and build
+        run: |
+          PROJECT_DIR=$(find extracted -name "gradlew" -exec dirname {} \; | head -n 1)
+          echo "Project found at: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          find . -name "*.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: NOVA-AI-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: extracted/**/*.apk
